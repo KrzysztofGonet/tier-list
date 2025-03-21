@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tier List Maker</title>
+  
+  <!-- Style aplikacji -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    #root {
+      min-height: 100vh;
+    }
+
+    /* Animacja dla nowo upuszczonych elementów */
+    @keyframes dropAnimation {
+      0% {
+        transform: scale(0.5);
+        opacity: 0.3;
+      }
+      50% {
+        transform: scale(1.3);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .drop-animation {
+      animation: dropAnimation 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Style do emulacji klas Tailwind używanych w aplikacji */
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex-wrap { flex-wrap: wrap; }
+    .flex-nowrap { flex-wrap: nowrap; }
+    .flex-1 { flex: 1; }
+    .flex-shrink-0 { flex-shrink: 0; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-end { justify-content: flex-end; }
+    .space-y-2 > * + * { margin-top: 0.5rem; }
+    .space-y-3 > * + * { margin-top: 0.75rem; }
+    .space-x-2 > * + * { margin-left: 0.5rem; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-2 { gap: 0.5rem; }
+    .p-1 { padding: 0.25rem; }
+    .p-2 { padding: 0.5rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-4 { padding: 1rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .pt-2 { padding-top: 0.5rem; }
+    .pb-2 { padding-bottom: 0.5rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mr-1 { margin-right: 0.25rem; }
+    .mx-2 { margin-left: 0.5rem; margin-right: 0.5rem; }
+    .w-6 { width: 1.5rem; }
+    .h-6 { height: 1.5rem; }
+    .w-full { width: 100%; }
+    .h-full { height: 100%; }
+    .h-24 { height: 6rem; }
+    .max-w-xs { max-width: 20rem; }
+    .max-w-full { max-width: 100%; }
+    .max-h-16 { max-height: 4rem; }
+    .min-h-screen { min-height: 100vh; }
+    .min-h-\[100px\] { min-height: 100px; }
+    .text-xs { font-size: 0.75rem; }
+    .text-sm { font-size: 0.875rem; }
+    .text-md { font-size: 1rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-xl { font-size: 1.25rem; }
+    .font-bold { font-weight: 700; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .text-right { text-align: right; }
+    .text-white { color: white; }
+    .text-black { color: black; }
+    .text-gray-300 { color: #d1d5db; }
+    .text-gray-400 { color: #9ca3af; }
+    .text-gray-500 { color: #6b7280; }
+    .text-red-300 { color: #fca5a5; }
+    .text-red-400 { color: #f87171; }
+    .bg-black { background-color: #000; }
+    .bg-\[#000000\] { background-color: #000000; }
+    .bg-\[#050505\] { background-color: #050505; }
+    .bg-\[#0c0c0c\] { background-color: #0c0c0c; }
+    .bg-\[#181818\] { background-color: #181818; }
+    .bg-gray-600 { background-color: #4b5563; }
+    .bg-gray-700 { background-color: #374151; }
+    .bg-gray-800 { background-color: #1f2937; }
+    .bg-gray-900 { background-color: #111827; }
+    .bg-blue-500 { background-color: #3b82f6; }
+    .bg-blue-600 { background-color: #2563eb; }
+    .bg-blue-700 { background-color: #1d4ed8; }
+    .bg-red-500 { background-color: #ef4444; }
+    .bg-red-600 { background-color: #dc2626; }
+    .bg-red-700 { background-color: #b91c1c; }
+    .bg-yellow-500 { background-color: #eab308; }
+    .bg-yellow-600 { background-color: #ca8a04; }
+    .bg-orange-500 { background-color: #f97316; }
+    .bg-orange-600 { background-color: #ea580c; }
+    .bg-purple-600 { background-color: #9333ea; }
+    .bg-purple-700 { background-color: #7e22ce; }
+    .bg-purple-800 { background-color: #6b21a8; }
+    .hover\:bg-gray-600:hover { background-color: #4b5563; }
+    .hover\:bg-gray-700:hover { background-color: #374151; }
+    .hover\:bg-gray-800:hover { background-color: #1f2937; }
+    .hover\:bg-gray-900:hover { background-color: #111827; }
+    .hover\:bg-blue-600:hover { background-color: #2563eb; }
+    .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
+    .hover\:bg-red-600:hover { background-color: #dc2626; }
+    .hover\:bg-red-700:hover { background-color: #b91c1c; }
+    .hover\:bg-yellow-600:hover { background-color: #ca8a04; }
+    .hover\:bg-orange-600:hover { background-color: #ea580c; }
+    .hover\:bg-purple-600:hover { background-color: #9333ea; }
+    .hover\:text-red-300:hover { color: #fca5a5; }
+    .bg-opacity-0 { background-color: rgba(0, 0, 0, 0); }
+    .bg-opacity-40 { background-color: rgba(0, 0, 0, 0.4); }
+    .bg-opacity-80 { background-color: rgba(0, 0, 0, 0.8); }
+    .opacity-0 { opacity: 0; }
+    .opacity-25 { opacity: 0.25; }
+    .opacity-50 { opacity: 0.5; }
+    .opacity-70 { opacity: 0.7; }
+    .opacity-100 { opacity: 1; }
+    .hover\:opacity-50:hover { opacity: 0.5; }
+    .hover\:opacity-100:hover { opacity: 1; }
+    .border { border-width: 1px; }
+    .border-b { border-bottom-width: 1px; }
+    .border-t { border-top-width: 1px; }
+    .border-dashed { border-style: dashed; }
+    .border-gray-600 { border-color: #4b5563; }
+    .border-b-2 { border-bottom-width: 2px; }
+    .border-gray-700 { border-color: #374151; }
+    .border-gray-800 { border-color: #1f2937; }
+    .border-gray-900 { border-color: #111827; }
+    .hover\:border-blue-500:hover { border-color: #3b82f6; }
+    .rounded { border-radius: 0.25rem; }
+    .rounded-md { border-radius: 0.375rem; }
+    .object-contain { object-fit: contain; }
+    .object-cover { object-fit: cover; }
+    .overflow-x-auto { overflow-x: auto; }
+    .overflow-y-auto { overflow-y: auto; }
+    .overflow-hidden { overflow: hidden; }
+    .whitespace-nowrap { white-space: nowrap; }
+    .text-overflow-ellipsis { text-overflow: ellipsis; }
+    .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .transition-all { transition-property: all; }
+    .transition-colors { transition-property: background-color, border-color, color, fill, stroke; }
+    .duration-300 { transition-duration: 300ms; }
+    .cursor-pointer { cursor: pointer; }
+    .cursor-move { cursor: move; }
+    .z-10 { z-index: 10; }
+    .z-50 { z-index: 50; }
+    .absolute { position: absolute; }
+    .relative { position: relative; }
+    .fixed { position: fixed; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .top-2 { top: 0.5rem; }
+    .right-2 { right: 0.5rem; }
+    .bottom-2 { bottom: 0.5rem; }
+    .hidden { display: none; }
+    .block { display: block; }
+    .ring-1 { box-shadow: 0 0 0 1px rgba(66, 153, 225, 0.5); }
+    .ring-purple-400 { box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.5); }
+    .focus\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
+    .focus\:ring-1:focus { box-shadow: 0 0 0 1px rgba(66, 153, 225, 0.5); }
+    .focus\:ring-blue-500:focus { box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5); }
+    .bg-gradient-to-b { background-image: linear-gradient(to bottom, var(--tw-gradient-from, #000), var(--tw-gradient-to, #111827)); }
+    .from-black { --tw-gradient-from: #000; }
+    .to-gray-900 { --tw-gradient-to: #111827; }
+    
+    /* Style dla grup i efektów hover na grupach */
+    .group { position: relative; }
+    .group:hover .group-hover\:bg-opacity-40 { background-color: rgba(0, 0, 0, 0.4); }
+    .group:hover .group-hover\:opacity-100 { opacity: 1; }
+    
+    /* Dodatkowe style dla maksymalnej wysokości kontenerów */
+    .max-h-\[calc\(100vh-350px\)\] { max-height: calc(100vh - 350px); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Załaduj React, ReactDOM i Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Kod aplikacji -->
+  <script type="text/babel">
+    // Komponent TierListMaker
+    const TierListMaker = () => {
+      // Definicja poziomów tier z klasycznymi kolorami
+      const tiers = [
+        { id: 'tier-s', name: 'S', bgColor: '#ff9999', textColor: 'black' },
+        { id: 'tier-a', name: 'A', bgColor: '#ffcc99', textColor: 'black' },
+        { id: 'tier-b', name: 'B', bgColor: '#ffdd88', textColor: 'black' },
+        { id: 'tier-c', name: 'C', bgColor: '#ffff99', textColor: 'black' },
+        { id: 'tier-d', name: 'D', bgColor: '#ccff99', textColor: 'black' },
+      ];
+
+      // ====== STAN APLIKACJI ======
+      // Stan dla tworzenia/edycji elementów
+      const [newName, setNewName] = React.useState('');
+      const [newImage, setNewImage] = React.useState('📱');
+      const [newImageUrl, setNewImageUrl] = React.useState('');
+      const [isModalOpen, setIsModalOpen] = React.useState(false);
+      const [editingApp, setEditingApp] = React.useState(null);
+      
+      // Główny stan aplikacji
+      const [apps, setApps] = React.useState(() => {
+        // Próba odczytania z localStorage
+        const savedApps = localStorage.getItem('tierListApps');
+        return savedApps ? JSON.parse(savedApps) : [];
+      });
+
+      const [tierItems, setTierItems] = React.useState(() => {
+        // Próba odczytania z localStorage
+        const savedTierItems = localStorage.getItem('tierListItems');
+        if (savedTierItems) {
+          return JSON.parse(savedTierItems);
+        } else {
+          return {
+            'tier-s': [],
+            'tier-a': [],
+            'tier-b': [],
+            'tier-c': [],
+            'tier-d': [],
+            'apps-container': []
+          };
+        }
+      });
+      
+      // Stan dla drag and drop
+      const [draggedItem, setDraggedItem] = React.useState(null);
+      const [recentlyDroppedItems, setRecentlyDroppedItems] = React.useState({});
+      
+      // Stan dla trybu interfejsu
+      const [showInterface, setShowInterface] = React.useState(true);
+      const [presentationMode, setPresentationMode] = React.useState(false);
+      
+      // Stan dla nagłówka
+      const [headerTitle, setHeaderTitle] = React.useState(() => {
+        // Próba odczytania z localStorage
+        const savedTitle = localStorage.getItem('tierListTitle');
+        return savedTitle || 'TIER LIST';
+      });
+      const [showHeader, setShowHeader] = React.useState(true);
+      const [editingHeader, setEditingHeader] = React.useState(false);
+      
+      // Referencje dla elementów DOM
+      const dropZoneRef = React.useRef(null);
+      const appContainerRef = React.useRef(null);
+
+      // ====== EFEKTY ======
+      // Zapisywanie do localStorage po zmianie stanu
+      React.useEffect(() => {
+        localStorage.setItem('tierListApps', JSON.stringify(apps));
+      }, [apps]);
+
+      React.useEffect(() => {
+        localStorage.setItem('tierListItems', JSON.stringify(tierItems));
+      }, [tierItems]);
+      
+      // Zapisywanie tytułu nagłówka do localStorage
+      React.useEffect(() => {
+        localStorage.setItem('tierListTitle', headerTitle);
+      }, [headerTitle]);
+
+      // Obsługa drag and drop dla obrazów na cały obszar aplikacji
+      React.useEffect(() => {
+        const handleAppDragOver = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        };
+        
+        const handleAppDrop = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Upuszczono na główny obszar aplikacji (nie w modalnym oknie)
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.match('image.*')) {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                // Automatycznie tworzenie nowego elementu z upuszczonym obrazem
+                const newId = `app-${Date.now()}`;
+                const newApp = {
+                  id: newId,
+                  name: file.name.split('.')[0].substring(0, 15), // Nazwa pliku jako domyślna nazwa elementu
+                  image: '',
+                  imageUrl: event.target.result
+                };
+                
+                setApps(prev => [...prev, newApp]);
+                setTierItems(prev => ({
+                  ...prev,
+                  'apps-container': [...prev['apps-container'], newId]
+                }));
+              };
+              reader.readAsDataURL(file);
+            }
+          }
+        };
+        
+        // Dodajemy nasłuchiwanie zdarzeń dla całego dokumentu
+        document.addEventListener('dragover', handleAppDragOver);
+        document.addEventListener('drop', handleAppDrop);
+        
+        return () => {
+          document.removeEventListener('dragover', handleAppDragOver);
+          document.removeEventListener('drop', handleAppDrop);
+        };
+      }, []);
+
+      // Obsługa drag and drop dla obrazów
+      React.useEffect(() => {
+        const dropZone = dropZoneRef.current;
+        
+        if (!dropZone) return;
+        
+        const handleDragOver = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.add('bg-gray-700');
+        };
+        
+        const handleDragLeave = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.remove('bg-gray-700');
+        };
+        
+        const handleDrop = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.remove('bg-gray-700');
+          
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.match('image.*')) {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                setNewImageUrl(event.target.result);
+              };
+              reader.readAsDataURL(file);
+            }
+          }
+        };
+        
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('dragleave', handleDragLeave);
+        dropZone.addEventListener('drop', handleDrop);
+        
+        return () => {
+          dropZone.removeEventListener('dragover', handleDragOver);
+          dropZone.removeEventListener('dragleave', handleDragLeave);
+          dropZone.removeEventListener('drop', handleDrop);
+        };
+      }, []);
+
+      // ====== FUNKCJE POMOCNICZE ======
+      // Funkcja do znalezienia aplikacji po id
+      const findAppById = (id) => {
+        return apps.find(app => app.id === id);
+      };
+
+      // ====== OBSŁUGA DRAG AND DROP ======
+      // Obsługa rozpoczęcia przeciągania
+      const handleDragStart = (e, item, sourceContainer) => {
+        setDraggedItem({ item, sourceContainer });
+        e.target.classList.add('opacity-50');
+      };
+
+      const handleDragEnd = (e) => {
+        e.target.classList.remove('opacity-50');
+      };
+
+      // Obsługa upuszczenia elementu
+      const handleDrop = (e, targetContainer) => {
+        e.preventDefault();
+        
+        if (!draggedItem) return;
+        
+        const { item, sourceContainer } = draggedItem;
+        
+        // Jeśli przesunięto do tego samego kontenera, nie rób nic
+        if (sourceContainer === targetContainer) {
+          setDraggedItem(null);
+          return;
+        }
+        
+        // Sprawdź, czy element jest przeciągany z dolnego panelu do tabeli tier
+        const isFromToolsToCategoryDrop = sourceContainer === 'apps-container' && targetContainer.startsWith('tier-');
+        
+        // Aktualizacja stanu
+        setTierItems(prev => {
+          // Usuń element z poprzedniego kontenera
+          const sourceItems = [...prev[sourceContainer]].filter(id => id !== item);
+          
+          // Dodaj element do nowego kontenera
+          const targetItems = [...prev[targetContainer], item];
+          
+          return {
+            ...prev,
+            [sourceContainer]: sourceItems,
+            [targetContainer]: targetItems
+          };
+        });
+        
+        // Jeśli element jest przenoszony z dolnego panelu do kategorii, dodaj go do ostatnio upuszczonych
+        if (isFromToolsToCategoryDrop) {
+          setRecentlyDroppedItems(prev => ({
+            ...prev,
+            [item]: {
+              targetContainer,
+              timestamp: Date.now()
+            }
+          }));
+          
+          // Usuń element z listy ostatnio upuszczonych po czasie animacji
+          setTimeout(() => {
+            setRecentlyDroppedItems(prev => {
+              const newState = {...prev};
+              delete newState[item];
+              return newState;
+            });
+          }, 800); // Trochę dłużej niż czas animacji (700ms)
+        }
+        
+        setDraggedItem(null);
+      };
+
+      // Obsługa zdarzenia dragover
+      const handleDragOver = (e) => {
+        e.preventDefault();
+      };
+
+      // ====== ZARZĄDZANIE ELEMENTAMI ======
+      // Funkcja do dodawania nowego elementu
+      const addNewItem = () => {
+        if (!newName.trim()) {
+          alert('Nazwa nie może być pusta!');
+          return;
+        }
+
+        const newId = `app-${Date.now()}`;
+        const newApp = {
+          id: newId,
+          name: newName,
+          image: newImage,
+          imageUrl: newImageUrl
+        };
+
+        setApps(prev => [...prev, newApp]);
+        setTierItems(prev => ({
+          ...prev,
+          'apps-container': [...prev['apps-container'], newId]
+        }));
+
+        // Reset formularza
+        setNewName('');
+        setNewImage('📱');
+        setNewImageUrl('');
+        setIsModalOpen(false);
+      };
+
+      // Dodaje nowy pusty element od razu bez okna modalnego
+      const addEmptyItem = () => {
+        const newId = `app-${Date.now()}`;
+        const newApp = {
+          id: newId,
+          name: '',
+          image: '',
+          imageUrl: ''
+        };
+
+        setApps(prev => [...prev, newApp]);
+        setTierItems(prev => ({
+          ...prev,
+          'apps-container': [...prev['apps-container'], newId]
+        }));
+      };
+
+      // Funkcja do usuwania elementu
+      const deleteItem = (id) => {
+        if (confirm('Czy na pewno chcesz usunąć ten element?')) {
+          setApps(prev => prev.filter(app => app.id !== id));
+          
+          setTierItems(prev => {
+            const newTierItems = {};
+            for (const [key, value] of Object.entries(prev)) {
+              newTierItems[key] = value.filter(itemId => itemId !== id);
+            }
+            return newTierItems;
+          });
+        }
+      };
+
+      // Funkcja do edycji elementu
+      const startEdit = (id) => {
+        const app = findAppById(id);
+        if (app) {
+          setEditingApp(id);
+          setNewName(app.name);
+          setNewImage(app.image);
+          setNewImageUrl(app.imageUrl);
+          setIsModalOpen(true);
+        }
+      };
+
+      const updateItem = () => {
+        if (!newName.trim()) {
+          alert('Nazwa nie może być pusta!');
+          return;
+        }
+
+        setApps(prev => prev.map(app => 
+          app.id === editingApp 
+            ? { ...app, name: newName, image: newImage, imageUrl: newImageUrl }
+            : app
+        ));
+
+        // Reset formularza
+        setNewName('');
+        setNewImage('📱');
+        setNewImageUrl('');
+        setIsModalOpen(false);
+        setEditingApp(null);
+      };
+
+      // ====== FUNKCJE ZARZĄDZANIA APLIKACJĄ ======
+      // Funkcja do resetowania tier listy
+      const resetTierList = () => {
+        if (confirm('Czy na pewno chcesz zresetować listę? Wszystkie zmiany zostaną utracone.')) {
+          setApps([]);
+          setTierItems({
+            'tier-s': [],
+            'tier-a': [],
+            'tier-b': [],
+            'tier-c': [],
+            'tier-d': [],
+            'apps-container': []
+          });
+          localStorage.removeItem('tierListApps');
+          localStorage.removeItem('tierListItems');
+        }
+      };
+
+      // Funkcja do czyszczenia dolnego panelu
+      const clearTools = () => {
+        if (confirm('Czy na pewno chcesz usunąć wszystkie elementy z dolnego panelu?')) {
+          setTierItems(prev => ({
+            ...prev,
+            'apps-container': []
+          }));
+          // Zapisujemy zmiany w localStorage
+          localStorage.setItem('tierListItems', JSON.stringify({
+            ...tierItems,
+            'apps-container': []
+          }));
+        }
+      };
+
+      // Funkcja do czyszczenia pamięci podręcznej
+      const clearCache = () => {
+        if (confirm('Czy na pewno chcesz wyczyścić pamięć podręczną? Wszystkie zmiany zostaną utracone.')) {
+          // Czyszczenie localStorage
+          localStorage.clear();
+          
+          // Resetowanie stanu aplikacji
+          setApps([]);
+          setTierItems({
+            'tier-s': [],
+            'tier-a': [],
+            'tier-b': [],
+            'tier-c': [],
+            'tier-d': [],
+            'apps-container': []
+          });
+          setHeaderTitle('TIER LIST'); // Przywrócenie domyślnej nazwy nagłówka
+          
+          // Informacja o pomyślnym wyczyszczeniu
+          alert('Pamięć podręczna została wyczyszczona.');
+        }
+      };
+
+      // ====== RENDEROWANIE ======
+      return (
+        <div className={`flex flex-col space-y-2 p-3 relative w-full h-full min-h-screen transition-all duration-300`} 
+          style={{ 
+            background: `linear-gradient(to bottom, #121212, #1e1e1e)`, 
+            color: '#fff' 
+          }}>
+          {/* Przyciski sterujące */}
+          <div className="absolute top-2 right-2 flex gap-2 z-10">
+            <button
+              onClick={() => setShowHeader(!showHeader)}
+              className={`p-1 bg-gray-800 text-white rounded hover:bg-gray-700 text-xs w-6 h-6 flex items-center justify-center ${presentationMode ? 'opacity-25 hover:opacity-100' : ''}`}
+              title={showHeader ? "Ukryj nagłówek" : "Pokaż nagłówek"}
+            >
+              H
+            </button>
+            <button
+              onClick={() => setShowInterface(!showInterface)}
+              className={`p-1 bg-gray-800 text-white rounded hover:bg-gray-700 text-xs w-6 h-6 flex items-center justify-center ${presentationMode ? 'opacity-25 hover:opacity-100' : ''}`}
+              title={showInterface ? "Ukryj interfejs" : "Pokaż interfejs"}
+            >
+              {showInterface ? "−" : "+"}
+            </button>
+            <button
+              onClick={() => setPresentationMode(!presentationMode)}
+              className={`p-1 ${presentationMode ? 'bg-purple-800 ring-1 ring-purple-400' : 'bg-purple-700'} text-white rounded hover:bg-purple-600 text-xs w-6 h-6 flex items-center justify-center`}
+              title={presentationMode ? "Wyłącz tryb prezentacji" : "Włącz tryb prezentacji"}
+            >
+              P
+            </button>
+          </div>
+          
+          {/* Główny interfejs - pokazywany/ukrywany */}
+          <div className={`flex items-center justify-between mb-2 ${showInterface && showHeader ? 'block' : 'hidden'}`}>
+            {editingHeader ? (
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  value={headerTitle}
+                  onChange={(e) => setHeaderTitle(e.target.value)}
+                  className="bg-gray-800 border border-gray-700 text-white text-xl font-bold p-1 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  autoFocus
+                  onBlur={() => setEditingHeader(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setEditingHeader(false);
+                    }
+                  }}
+                />
+                <button 
+                  onClick={() => setEditingHeader(false)}
+                  className="ml-2 p-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+                >
+                  OK
+                </button>
+              </div>
+            ) : (
+              <h1 
+                className="text-xl font-bold text-white cursor-pointer hover:text-gray-300"
+                onClick={() => setEditingHeader(true)}
+                title="Kliknij, aby edytować tytuł"
+              >
+                {headerTitle}
+              </h1>
+            )}
+          </div>
+          
+          {/* Tier Rows */}
+          <div className="flex flex-col w-full" style={{ margin: '15px 0', padding: '10px', background: '#0a0a0a', borderRadius: '8px', boxShadow: '0 5px 15px rgba(0,0,0,0.4)' }}>
+            {tiers.map(tier => (
+              <div key={tier.id} className="flex w-full" style={{ 
+                marginBottom: '8px', 
+                boxShadow: '0 3px 10px rgba(0,0,0,0.5)',
+                border: '1px solid #555'
+              }}>
+                <div 
+                  style={{
+                    backgroundColor: tier.bgColor,
+                    color: tier.textColor,
+                    width: presentationMode ? '80px' : '60px',
+                    height: presentationMode ? '100px' : '80px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: presentationMode ? '42px' : '32px',
+                    borderRight: `4px solid #666`,
+                    flexShrink: 0,
+                    transition: 'all 0.3s ease',
+                    boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3), 2px 0 5px rgba(0,0,0,0.2)',
+                    borderTopLeftRadius: '4px',
+                    borderBottomLeftRadius: '4px'
+                  }}
+                >
+                  {tier.name}
+                </div>
+                <div 
+                  id={tier.id}
+                  className="flex-1 p-2 flex flex-nowrap gap-2 overflow-x-auto"
+                  style={{
+                    minHeight: presentationMode ? '100px' : '80px',
+                    maxHeight: presentationMode ? '100px' : '80px',
+                    overflowY: 'hidden',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#aaa #333',
+                    background: presentationMode ? '#111' : '#1a1a1a',
+                    borderTopRightRadius: '4px',
+                    borderBottomRightRadius: '4px',
+                    borderLeft: 'none'
+                  }}
+                  style={{
+                    minHeight: presentationMode ? '100px' : '80px',
+                    maxHeight: presentationMode ? '100px' : '80px',
+                    overflowY: 'hidden',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: presentationMode ? '#222222 #050505' : '#333333 #0c0c0c'
+                  }}
+                  onDrop={(e) => handleDrop(e, tier.id)}
+                  onDragOver={handleDragOver}
+                >
+                  {tierItems[tier.id]?.map(itemId => {
+                    const app = findAppById(itemId);
+                    if (!app) return null;
+                    return (
+                      <div
+                        key={itemId}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, itemId, tier.id)}
+                        onDragEnd={handleDragEnd}
+                        style={{
+                          width: presentationMode ? '80px' : '64px',
+                          height: presentationMode ? '90px' : '70px',
+                          backgroundColor: presentationMode ? '#181818' : '#222222',
+                          borderRadius: '4px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: presentationMode ? '0 4px 12px rgba(0,0,0,0.8)' : '0 2px 4px rgba(0,0,0,0.3)',
+                          cursor: 'move',
+                          transition: 'all 0.3s ease',
+                          position: 'relative',
+                          flexShrink: 0,
+                          margin: '3px 2px',
+                          border: 'none' // Usunięcie obramowania niezależnie od trybu prezentacji
+                        }}
+                        className={`group ${presentationMode ? 'hover:bg-gray-900' : 'hover:bg-gray-800'} ${recentlyDroppedItems[itemId]?.targetContainer === tier.id ? 'drop-animation' : ''}`}
+                        title={app?.name}
+                      >
+                        {app.imageUrl ? (
+                          <img 
+                            src={app.imageUrl} 
+                            alt={app.name || 'Element'} 
+                            style={{
+                              width: '100%', // Grafika na pełną szerokość
+                              height: '100%', // Dostosowanie wysokości
+                              objectFit: 'contain', // Zachowanie proporcji
+                              borderRadius: '3px',
+                              transition: 'all 0.3s ease',
+                              filter: presentationMode ? 'brightness(1.2)' : 'none',
+                              padding: '2px' // Mały padding, aby grafika nie dotykała krawędzi elementu
+                            }}
+                          />
+                        ) : app.image ? (
+                          <div style={{ 
+                            fontSize: presentationMode ? '32px' : '24px',
+                            transition: 'all 0.3s ease',
+                            textShadow: presentationMode ? '0 0 10px rgba(255,255,255,0.3)' : 'none'
+                          }}>
+                            {app.image}
+                          </div>
+                        ) : (
+                          <div style={{ 
+                            width: presentationMode ? '48px' : '36px', 
+                            height: presentationMode ? '48px' : '36px', 
+                            borderRadius: '3px',
+                            backgroundColor: presentationMode ? '#333' : '#444',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.3s ease'
+                          }}>
+                            <span className={presentationMode ? 'text-gray-400' : 'text-gray-500'}>+</span>
+                          </div>
+                        )}
+                        <div style={{ 
+                          fontSize: presentationMode ? '14px' : '12px',
+                          color: presentationMode ? '#e0e0e0' : 'white',
+                          fontWeight: 'bold',
+                          width: '100%',
+                          textAlign: 'center',
+                          padding: '0 2px',
+                          marginTop: '4px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.3s ease',
+                          textShadow: presentationMode ? '0 0 5px rgba(0,0,0,0.8)' : 'none'
+                        }}>
+                          {app.name || ''}
+                        </div>
+                        
+                        <div className={`absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all ${presentationMode ? 'opacity-0 hover:opacity-50' : ''}`}>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEdit(itemId);
+                            }}
+                            style={{
+                              padding: '3px 6px',
+                              backgroundColor: '#3182ce',
+                              color: 'white',
+                              borderRadius: '3px',
+                              marginRight: '4px',
+                              fontSize: '10px'
+                            }}
+                            className="hover:bg-blue-600"
+                            title="Edytuj"
+                          >
+                            E
+                          </button>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              
+                              // Bezpośrednie usuwanie bez potwierdzenia dla szybszej obsługi
+                              const newApps = apps.filter(app => app.id !== itemId);
+                              setApps(newApps);
+                              
+                              // Usuwamy element ze wszystkich kontenerów tierItems
+                              const newTierItems = {};
+                              for (const [key, values] of Object.entries(tierItems)) {
+                                newTierItems[key] = values.filter(id => id !== itemId);
+                              }
+                              setTierItems(newTierItems);
+                              
+                              // Zapisujemy zmiany do localStorage
+                              localStorage.setItem('tierListApps', JSON.stringify(newApps));
+                              localStorage.setItem('tierListItems', JSON.stringify(newTierItems));
+                            }}
+                            style={{
+                              padding: '3px 6px',
+                              backgroundColor: '#e53e3e',
+                              color: 'white',
+                              borderRadius: '3px',
+                              fontSize: '10px'
+                            }}
+                            className="hover:bg-red-600"
+                            title="Usuń"
+                          >
+                            X
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Apps Container */}
+          <div className={`p-3 rounded mt-4 transition-all duration-300 ${presentationMode && !showInterface ? 'opacity-70 hover:opacity-100' : ''}`}
+            style={{ 
+              background: presentationMode ? '#111' : '#1a1a1a',
+              border: '1px solid #555',
+              boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+              borderRadius: '8px'
+            }}>
+            <h2 className="text-sm font-semibold mb-2 text-white flex justify-between items-center">
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                {presentationMode ? 'DOSTĘPNE ELEMENTY' : 'ELEMENTY'} 
+                <span className="text-xs text-gray-400 ml-2">(przeciągnij i upuść obrazy bezpośrednio tutaj)</span>
+              </span>
+              {showInterface && (
+                <div className="flex gap-1">
+                  <button 
+                    onClick={addEmptyItem}
+                    className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
+                    title="Dodaj nowy element"
+                  >
+                    +
+                  </button>
+                  <button 
+                    onClick={clearTools}
+                    className="px-3 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600 transition-colors"
+                    title="Wyczyść narzędzia"
+                  >
+                    N
+                  </button>
+                  <button 
+                    onClick={clearCache}
+                    className="px-3 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition-colors"
+                    title="Wyczyść pamięć podręczną"
+                  >
+                    C
+                  </button>
+                  <button 
+                    onClick={resetTierList}
+                    className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
+                    title="Reset listy"
+                  >
+                    R
+                  </button>
+                </div>
+              )}
+            </h2>
+            <div 
+              id="apps-container"
+              ref={appContainerRef}
+              className="flex flex-wrap gap-1 max-h-[calc(100vh-350px)] min-h-[100px] overflow-y-auto"
+              style={{ 
+                scrollbarWidth: 'thin', 
+                scrollbarColor: '#4b5563 #1f2937',
+                padding: '10px',
+                background: 'rgba(0,0,0,0.2)',
+                borderRadius: '6px',
+                border: '2px dashed #555'
+              }}
+              onDrop={(e) => handleDrop(e, 'apps-container')}
+              onDragOver={handleDragOver}
+            >
+              {tierItems['apps-container']?.map(itemId => {
+                const app = findAppById(itemId);
+                if (!app) return null;
+                return (
+                  <div
+                    key={itemId}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, itemId, 'apps-container')}
+                    onDragEnd={handleDragEnd}
+                    style={{
+                      width: presentationMode ? '80px' : '64px',
+                      height: presentationMode ? '90px' : '70px',
+                      backgroundColor: presentationMode ? '#181818' : '#222222',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: presentationMode ? '0 4px 12px rgba(0,0,0,0.8)' : '0 2px 4px rgba(0,0,0,0.3)',
+                      cursor: 'move',
+                      transition: 'all 0.3s ease',
+                      position: 'relative',
+                      margin: '2px',
+                      border: 'none' // Usunięcie obramowania niezależnie od trybu prezentacji
+                    }}
+                    className={`group ${presentationMode ? 'hover:bg-gray-900' : 'hover:bg-gray-800'}`}
+                    title={app?.name}
+                  >
+                    {app.imageUrl ? (
+                      <img 
+                        src={app.imageUrl} 
+                        alt={app.name || 'Element'} 
+                        style={{
+                          width: '100%', // Grafika na pełną szerokość
+                          height: '100%', // Dostosowanie wysokości
+                          objectFit: 'contain', // Zachowanie proporcji
+                          borderRadius: '3px',
+                          transition: 'all 0.3s ease',
+                          filter: presentationMode ? 'brightness(1.2)' : 'none',
+                          padding: '2px' // Mały padding, aby grafika nie dotykała krawędzi elementu
+                        }}
+                      />
+                    ) : app.image ? (
+                      <div style={{ 
+                        fontSize: presentationMode ? '32px' : '24px',
+                        transition: 'all 0.3s ease',
+                        textShadow: presentationMode ? '0 0 10px rgba(255,255,255,0.3)' : 'none'
+                      }}>
+                        {app.image}
+                      </div>
+                    ) : (
+                      <div style={{ 
+                        width: presentationMode ? '48px' : '36px', 
+                        height: presentationMode ? '48px' : '36px', 
+                        borderRadius: '3px',
+                        backgroundColor: presentationMode ? '#333' : '#444',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.3s ease'
+                      }}>
+                        <span className={presentationMode ? 'text-gray-400' : 'text-gray-500'}>+</span>
+                      </div>
+                    )}
+                    <div style={{ 
+                      fontSize: presentationMode ? '14px' : '12px',
+                      color: presentationMode ? '#e0e0e0' : 'white',
+                      fontWeight: 'bold',
+                      width: '100%',
+                      textAlign: 'center',
+                      padding: '0 2px',
+                      marginTop: '4px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.3s ease',
+                      textShadow: presentationMode ? '0 0 5px rgba(0,0,0,0.8)' : 'none'
+                    }}>
+                      {app.name || ''}
+                    </div>
+
+                    {/* Przyciski edycji - widoczne po najechaniu */}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEdit(itemId);
+                        }}
+                        className="p-1 bg-blue-500 text-white rounded mr-1 hover:bg-blue-600 text-xs"
+                        title="Edytuj"
+                      >
+                        E
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteItem(itemId);
+                        }}
+                        className="p-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                        title="Usuń"
+                      >
+                        X
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Modal do dodawania/edycji elementów */}
+          {isModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+              <div className="p-4 bg-gray-900 rounded-md border border-gray-700 w-full max-w-xs mx-2 shadow-xl">
+                <h2 className="text-md font-bold mb-3 text-white border-b border-gray-700 pb-2">
+                  {editingApp ? 'EDYTUJ ELEMENT' : 'NOWY ELEMENT'}
+                </h2>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium mb-1 text-gray-300">Nazwa (opcjonalnie)</label>
+                    <input 
+                      type="text" 
+                      value={newName} 
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="w-full p-2 border rounded bg-gray-800 border-gray-700 text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      placeholder="Nazwa elementu"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium mb-1 text-gray-300">Emoji (opcjonalnie)</label>
+                    <input 
+                      type="text" 
+                      value={newImage} 
+                      onChange={(e) => setNewImage(e.target.value)}
+                      className="w-full p-2 border rounded bg-gray-800 border-gray-700 text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      placeholder="Emoji"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium mb-1 text-gray-300">Obraz (opcjonalnie)</label>
+                    <div 
+                      ref={dropZoneRef}
+                      className="w-full h-24 border border-dashed border-gray-600 rounded flex flex-col items-center justify-center text-gray-400 text-xs cursor-pointer hover:border-blue-500 transition-colors"
+                      onClick={() => document.getElementById('fileInput').click()}
+                    >
+                      {newImageUrl ? (
+                        <div className="flex flex-col items-center">
+                          <img 
+                            src={newImageUrl} 
+                            alt="Podgląd" 
+                            className="max-h-16 max-w-full object-contain rounded" 
+                          />
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNewImageUrl('');
+                            }}
+                            className="mt-1 text-xs text-red-400 hover:text-red-300"
+                          >
+                            Usuń obraz
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <p>Przeciągnij i upuść obraz</p>
+                          <p className="text-xs">lub kliknij, aby wybrać</p>
+                        </div>
+                      )}
+                    </div>
+                    <input 
+                      id="fileInput"
+                      type="file" 
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            setNewImageUrl(event.target.result);
+                          };
+                          reader.readAsDataURL(e.target.files[0]);
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 pt-2 border-t border-gray-700 mt-3">
+                    <button 
+                      onClick={() => {
+                        setIsModalOpen(false);
+                        setEditingApp(null);
+                        setNewName('');
+                        setNewImage('');
+                        setNewImageUrl('');
+                      }}
+                      className="px-3 py-2 bg-gray-700 text-white rounded text-xs hover:bg-gray-600 transition-colors"
+                    >
+                      Anuluj
+                    </button>
+                    <button 
+                      onClick={editingApp ? updateItem : addNewItem}
+                      className="px-4 py-2 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
+                    >
+                      {editingApp ? 'Zapisz' : 'Dodaj'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div className={`text-xs text-gray-500 mt-2 text-center ${showInterface && !presentationMode ? 'block' : 'hidden'}`}>
+            <p>© Tier List Maker 2025</p>
+          </div>
+          
+          {/* Tryb prezentacji - oznaczenie */}
+          {presentationMode && (
+            <div className="fixed bottom-2 right-2 text-xs text-gray-500 bg-black bg-opacity-80 px-2 py-1 rounded border border-gray-800">
+              Tryb prezentacji
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // Renderowanie aplikacji
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<TierListMaker />);
+  </script>
+</body>
+</html>
